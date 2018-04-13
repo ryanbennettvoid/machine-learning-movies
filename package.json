@@ -1,0 +1,17 @@
+{
+  "name": "machine-learning-movies",
+  "version": "1.0.0",
+  "description": "",
+  "main": "get-movies.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "md5": "^2.2.1",
+    "node-fetch": "^2.1.2"
+  }
+}
