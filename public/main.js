@@ -87,6 +87,8 @@
   } )
   ;
 
+  // ---
+
   var startPolling = function() {
 
     setInterval( function() {
@@ -104,14 +106,18 @@
       .then( function( data ) {
 
         if ( _chart ) {
-          _chart.data = createData( data );
+          var newData = createData( data );
+          _chart.labels = newData.labels;
+          _chart.data.datasets[ 0 ].data = newData.datasets[ 0 ].data;
+          _chart.data.datasets[ 1 ].data = newData.datasets[ 1 ].data;
+          _chart.data.datasets[ 2 ].data = newData.datasets[ 2 ].data;
           _chart.update();
         }
 
       } )
       ;
 
-    }, 10 * 1000 );
+    }, 1000 * 5 );
 
   };
 

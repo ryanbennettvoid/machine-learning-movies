@@ -17,7 +17,7 @@ let regressionModel;
 // refresh model periodically
 const timer = setInterval( () => {
   regressionModel = new SLR( x, y );
-}, 10 * 1000 );
+}, 1000 * 5 );
 
 // ---
 
@@ -75,7 +75,11 @@ movieFetcher.on( 'end', () => {
 
     if ( !regressionModel ) return res.json( { inputs, outputs, samples, averages } );
 
-    for ( let year = 1917; year <= 2017; year++ ) {
+    const currentYear = parseInt( moment().format( 'YYYY' ) );
+    const yearRange = 100;
+    const startYear = currentYear - yearRange;
+
+    for ( let year = startYear; year <= currentYear; year++ ) {
 
       inputs.push( year );
       outputs.push( regressionModel.predict( parseFloat( year ) ) );

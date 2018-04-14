@@ -6,6 +6,7 @@ const Readable = require( 'stream' ).Readable;
 const fetch = require( 'node-fetch' );
 const path = require( 'path' );
 const md5 = require( 'md5' );
+const moment = require( 'moment' );
 
 const low = require( 'lowdb' );
 const FileSync = require( 'lowdb/adapters/FileSync' );
@@ -13,6 +14,8 @@ const adapter = new FileSync( 'db.json' );
 
 const db = low( adapter );
 db.defaults( { pages: [] } ).write();
+
+// ---
 
 const customFetch = ( url ) => {
 
@@ -37,18 +40,19 @@ const customFetch = ( url ) => {
 
 };
 
-module.exports = () => {
+// ---
 
-  const s = new Readable( {
-    objectMode: true,
-    read: () => {}
-  } );
+const handleStream = ( s ) => {
 
   // iterate over each year...
 
-  const years = Array.from( new Array( 100 ) ).map( ( _, i ) => i + 1918 );
+  const currentYear = parseInt( moment().format( 'YYYY' ) );
+  const yearRange = 100;
+  const startYear = currentYear - yearRange;
 
-  Promise.reduce( years, ( acc, year ) => {
+  const years = Array.from( new Array( yearRange ) ).map( ( _, i ) => i + startYear );
+
+  return Promise.reduce( years, ( acc, year ) => {
 
     // get first page and total num pages....
 
@@ -76,9 +80,6 @@ module.exports = () => {
           } );
 
         } )
-        .catch( ( err ) => {
-          s.emit( 'error', err );
-        } )
         ;
 
       }, [] )
@@ -88,10 +89,26 @@ module.exports = () => {
     ;
 
   }, [] )
+  .catch( ( err ) => {
+    s.emit( 'error', err );
+  } )
   .finally( () => {
     s.push( null );
   } )
   ;
+
+};
+
+// ---
+
+module.exports = () => {
+
+  const s = new Readable( {
+    objectMode: true,
+    read: () => {}
+  } );
+
+  handleStream( s );
 
   return s;
 
