@@ -1,21 +1,47 @@
 
 ( function() {
 
-  var createChart = function( args ) {
+  var normalizeValues = function( values ) {
+
+    var ratio = Math.max.apply( Math, values ) / 100;
+
+    return values.map( function ( v ) {
+      return Math.round( v / ratio );
+    } );
+
+  };
+
+  var createCharts = function( args ) {
 
     var inputs = args.inputs;
-    var outputs = args.outputs;
+    var outputs = args.outputs.map( ( o ) => o * 10 );
+    var samples = normalizeValues( args.samples );
+    var averages = args.averages.map( ( a ) => a * 10 );
 
     var config = {
       type: 'line',
       data: {
         labels: inputs,
-        datasets: [ {
-          data: outputs,
-          label: 'rating',
-          borderColor: '#336699',
-          fill: false
-        } ]
+        datasets: [
+          {
+            data: outputs,
+            label: 'predicted average yearly rating',
+            borderColor: '#336699',
+            fill: false
+          },
+          {
+            data: averages,
+            label: 'actual average yearly rating',
+            borderColor: '#ff0000',
+            fill: false
+          },
+          {
+            data: samples,
+            label: 'number of yearly samples',
+            borderColor: '#339933',
+            fill: false
+          }
+        ]
       },
       options: {
         title: {
@@ -43,9 +69,11 @@
 
     console.log( 'data: ', data );
 
-    createChart( {
+    createCharts( {
       inputs: data.inputs,
-      outputs: data.outputs
+      outputs: data.outputs,
+      samples: data.samples,
+      averages: data.averages
     } );
 
   } )

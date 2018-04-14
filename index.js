@@ -9,6 +9,7 @@ const createMovieFetcher = require( './streams/movie-fetcher.js' );
 
 const x = [];
 const y = [];
+const movieReleases = {};
 let regressionModel;
 
 let index = 0;
@@ -27,6 +28,9 @@ movieFetcher.on( 'data', ( data ) => {
 
   x.push( parseFloat( release_year ) );
   y.push( parseFloat( vote_average ) );
+  
+  movieReleases[ release_year ] = movieReleases[ release_year ] || [];
+  movieReleases[ release_year ].push( data );
 
 } );
 
@@ -53,15 +57,26 @@ const startServer = () => {
 
   app.get( '/data', ( req, res ) => {
     
-    const inputs = [];
-    const outputs = [];
+    const inputs = []; // years
+    const outputs = []; // ratings
+    const samples = []; // num of yearly ratings
+    const averages = []; // average rating each year
 
-    for ( let year = 1900; year < 2018; year++ ) {
+    for ( let year = 1917; year <= 2017; year++ ) {
+
       inputs.push( year );
       outputs.push( regressionModel.predict( parseFloat( year ) ) );
+
+      const movies = ( movieReleases[ year ] || [] );
+      samples.push( movies.length );
+
+      const average = movies.reduce( ( acc, m ) => acc + parseFloat( m.vote_average ) ,0 ) / movies.length;
+
+      averages.push( average || 0 );
+
     }
 
-    res.json( { inputs, outputs } );
+    res.json( { inputs, outputs, samples, averages } );
 
   } );
 
