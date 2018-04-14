@@ -32,6 +32,7 @@ At this point, you should have your API key in both `./config.json` and `./serve
 
 ```
 cd ./serverless-fetch
+npm install
 npm install -g serverless
 serverless config credentials --provider aws --key MY_AWS_KEY --secret MY_AWS_SECRET
 serverless deploy -v
