@@ -5,4 +5,4 @@ A Node.js app I'm using to practice machine learning. It will predict movie rati
 
 Requires an API key from https://www.themoviedb.org
 
-
+![chart](/screenshots/chart-4-13-16.png?raw=true)
