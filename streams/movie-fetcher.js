@@ -46,25 +46,25 @@ module.exports = () => {
 
   // iterate over each year...
 
-  const years = Array.from( new Array( 100 ) ).map( ( _, i ) => i + 1917 );
+  const years = Array.from( new Array( 100 ) ).map( ( _, i ) => i + 1918 );
 
   Promise.reduce( years, ( acc, year ) => {
 
     // get first page and total num pages....
 
-    const firstPageUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&year=${year}&page=1`;
+    const firstPageUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&sort_by=popularity.desc&year=${year}&page=1`;
 
     return customFetch( firstPageUrl )
     .then( ( firstPage ) => {
 
       const { total_pages } = firstPage;
 
-      const pages = Array.from( new Array( total_pages ) ).map( ( _, i ) => i + 1 );
+      const pages = Array.from( new Array( Math.min( 1000, total_pages ) ) ).map( ( _, i ) => i + 1 );
 
       // fetch each page...
       return Promise.reduce( pages, ( acc, page ) => {
 
-        const url = `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&sort_by=popularity.desc&page=${page}`;
+        const url = `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&sort_by=popularity.desc&year=${year}&page=${page}`
 
         return customFetch( url )
         .then( ( data ) => {

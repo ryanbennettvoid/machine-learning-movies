@@ -14,6 +14,13 @@ const movieReleases = {};
 
 let regressionModel;
 
+// refresh model periodically
+const timer = setInterval( () => {
+  regressionModel = new SLR( x, y );
+}, 10 * 1000 );
+
+// ---
+
 let index = 0;
 
 const movieFetcher = createMovieFetcher();
@@ -21,7 +28,6 @@ const movieFetcher = createMovieFetcher();
 movieFetcher.on( 'data', ( data ) => {
 
   if ( ++index % 100 === 0 && process.env.DEV ) log.info( `movies fetched: ${index}` );
-  if ( index % 1000 === 0 ) regressionModel = new SLR( x, y ); // refresh model periodically
 
   const { vote_average, release_date } = data;
 
@@ -47,6 +53,8 @@ movieFetcher.on( 'end', () => {
 
   log.debug( regressionModel.toString() );
 
+  clearInterval( timer );
+
 } );
 
 // ----
@@ -65,7 +73,7 @@ movieFetcher.on( 'end', () => {
     const samples = []; // num of yearly ratings
     const averages = []; // average rating each year
 
-    if ( !regressionModel ) return res.json( {} );
+    if ( !regressionModel ) return res.json( { inputs, outputs, samples, averages } );
 
     for ( let year = 1917; year <= 2017; year++ ) {
 
