@@ -5,7 +5,7 @@ const express = require( 'express' ), app = express();
 const bodyParser = require( 'body-parser' );
 const moment = require( 'moment' );
 const ml = require( 'ml-regression' ), SLR = ml.SLR;
-const createMovieFetcher = require( './streams/movie-fetcher.js' );
+const createMovieFetcher = require( './lib/movie-fetcher.js' );
 
 const x = [];
 const y = [];
