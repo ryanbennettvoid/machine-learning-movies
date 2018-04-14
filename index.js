@@ -9,7 +9,9 @@ const createMovieFetcher = require( './streams/movie-fetcher.js' );
 
 const x = [];
 const y = [];
+
 const movieReleases = {};
+
 let regressionModel;
 
 let index = 0;
@@ -18,7 +20,8 @@ const movieFetcher = createMovieFetcher();
 
 movieFetcher.on( 'data', ( data ) => {
 
-  if ( ++index % 2000 === 0 ) log.info( `movies fetched: ${index}` );
+  if ( ++index % 100 === 0 && process.env.DEV ) log.info( `movies fetched: ${index}` );
+  if ( index % 1000 === 0 ) regressionModel = new SLR( x, y ); // refresh model periodically
 
   const { vote_average, release_date } = data;
 
@@ -34,7 +37,9 @@ movieFetcher.on( 'data', ( data ) => {
 
 } );
 
-movieFetcher.on( 'error', log.error );
+movieFetcher.on( 'error', ( err ) => {
+  log.error( 'err: ', err );
+} );
 
 movieFetcher.on( 'end', () => {
 
@@ -42,13 +47,11 @@ movieFetcher.on( 'end', () => {
 
   log.debug( regressionModel.toString() );
 
-  // start express server for browser UI
-
-  startServer();
-
 } );
 
-const startServer = () => {
+// ----
+
+( () => {
 
   app.use( bodyParser.json() );
   app.use( bodyParser.urlencoded( { extended: true } ) );
@@ -62,6 +65,8 @@ const startServer = () => {
     const samples = []; // num of yearly ratings
     const averages = []; // average rating each year
 
+    if ( !regressionModel ) return res.json( {} );
+
     for ( let year = 1917; year <= 2017; year++ ) {
 
       inputs.push( year );
@@ -70,8 +75,7 @@ const startServer = () => {
       const movies = ( movieReleases[ year ] || [] );
       samples.push( movies.length );
 
-      const average = movies.reduce( ( acc, m ) => acc + parseFloat( m.vote_average ) ,0 ) / movies.length;
-
+      const average = movies.reduce( ( acc, m ) => acc + parseFloat( m.vote_average ), 0 ) / movies.length;
       averages.push( average || 0 );
 
     }
@@ -84,4 +88,4 @@ const startServer = () => {
     console.log( 'listening...' );
   } );
 
-};
+} )();
