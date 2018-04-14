@@ -55,9 +55,9 @@ movieFetcher.on( 'error', ( err ) => {
 movieFetcher.on( 'end', () => {
 
   updateModel();
-
   clearInterval( timer );
   log.info( 'done' );
+
 } );
 
 // ----
