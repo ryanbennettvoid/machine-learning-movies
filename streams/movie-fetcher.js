@@ -4,7 +4,6 @@ const { api_key } = require( '../config.json' );
 const Promise = require( 'bluebird' );
 const Readable = require( 'stream' ).Readable;
 const fetch = require( 'node-fetch' );
-const md5 = require( 'md5' );
 const path = require( 'path' );
 
 const low = require( 'lowdb' );
@@ -46,6 +45,7 @@ module.exports = () => {
     // ... otherwise, fetch then cache
 
     // API rate limiting is 4 req/sec
+
     return Promise.delay( 250 )
     .then( () => {
       return fetch( url )
