@@ -4,7 +4,7 @@ const Log = require( 'log' ), log = new Log();
 const express = require( 'express' ), app = express();
 const bodyParser = require( 'body-parser' );
 const moment = require( 'moment' );
-const ml = require( 'ml-regression' ), SLR = ml.SLR;
+const ml = require( 'ml-regression' ), SLR = ml.SLR, PR = ml.PolynomialRegression;
 const createMovieFetcher = require( './lib/movie-fetcher.js' );
 
 const x = [];
@@ -14,10 +14,14 @@ const movieReleases = {};
 
 let regressionModel;
 
+const updateModel = () => {
+  regressionModel = new PR( x, y, 5 );
+  log.debug( regressionModel.toString() );
+};
+
 // refresh model periodically
 const timer = setInterval( () => {
-  regressionModel = new SLR( x, y );
-  log.debug( regressionModel.toString() );
+  updateModel();
 }, 1000 * 5 );
 
 // ---
@@ -50,8 +54,8 @@ movieFetcher.on( 'error', ( err ) => {
 
 movieFetcher.on( 'end', () => {
 
-  regressionModel = new SLR( x, y );
-  log.debug( regressionModel.toString() );
+  updateModel();
+
   clearInterval( timer );
   log.info( 'done' );
 } );
@@ -68,7 +72,7 @@ movieFetcher.on( 'end', () => {
   app.get( '/data', ( req, res ) => {
     
     const inputs = []; // years
-    const outputs = []; // ratings
+    const outputs = []; // predicted average ratings
     const samples = []; // num of yearly ratings
     const averages = []; // average rating each year
 
