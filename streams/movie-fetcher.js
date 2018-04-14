@@ -2,13 +2,19 @@
 const { api_key } = require( '../config.json' );
 
 const Promise = require( 'bluebird' );
-const Readable = require('stream').Readable;
+const Readable = require( 'stream' ).Readable;
 const fetch = require( 'node-fetch' );
-const fs = require( 'fs' );
 const md5 = require( 'md5' );
 const path = require( 'path' );
 
+const low = require( 'lowdb' );
+const FileSync = require( 'lowdb/adapters/FileSync' );
+const adapter = new FileSync( 'db.json' );
+
 module.exports = () => {
+
+  const db = low( adapter );
+  db.defaults( { pages: [] } ).write();
 
   const s = new Readable( {
     objectMode: true,
@@ -20,17 +26,20 @@ module.exports = () => {
   Promise.reduce( pages, ( acc, page ) => {
 
     const url = `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&sort_by=popularity.desc&page=${page}`;
-    const urlHash = md5( url );
-    const cacheFilepath = path.resolve( __dirname, `../cache/${urlHash}` );
 
     // if page is cached, use cache
-    if ( fs.existsSync( cacheFilepath ) ) {
 
-      const data = JSON.parse( fs.readFileSync( cacheFilepath ) );
+    const dbPage = db.get( 'pages' ).find( { page } ).value();
+
+    if ( !!dbPage ) {
+
+      const { results } = dbPage;
 
       results.forEach( ( movie ) => {
         s.push( movie );
       } );
+
+      return;
 
     }
 
@@ -44,7 +53,7 @@ module.exports = () => {
     .then( ( res ) => res.json() )
     .then( ( data ) => {
 
-      fs.writeFileSync( cacheFilepath, JSON.stringify( data ) );
+      db.get( 'pages' ).push( data ).write();
 
       const { results } = data;
 
@@ -58,7 +67,11 @@ module.exports = () => {
     } )
     ;
 
-  }, [] );
+  }, [] )
+  .finally( () => {
+    s.push( null );
+  } )
+  ;
 
   return s;
 
