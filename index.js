@@ -17,6 +17,7 @@ let regressionModel;
 // refresh model periodically
 const timer = setInterval( () => {
   regressionModel = new SLR( x, y );
+  log.debug( regressionModel.toString() );
 }, 1000 * 5 );
 
 // ---
@@ -50,11 +51,9 @@ movieFetcher.on( 'error', ( err ) => {
 movieFetcher.on( 'end', () => {
 
   regressionModel = new SLR( x, y );
-
   log.debug( regressionModel.toString() );
-
   clearInterval( timer );
-
+  log.info( 'done' );
 } );
 
 // ----

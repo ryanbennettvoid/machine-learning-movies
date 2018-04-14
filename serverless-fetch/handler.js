@@ -13,7 +13,7 @@ module.exports.fetch = ( event, context, callback ) => {
   const url = `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}&sort_by=popularity.desc&year=${year}&page=${page}`;
 
   fetch( url, {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json'
     }
